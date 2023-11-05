@@ -30,14 +30,33 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         // Send a ping to confirm a successful connection
+        const jobCollection = client.db("hireHarbor").collection("jobs")
+        const categoryCollection = client.db("hireHarbor").collection("category")
+
+        app.get("/jobs", async (req, res) => {
+            const cursor = jobCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+        app.get("/category", async (req, res) => {
+            const cursor = categoryCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+
+
         await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
+
     } finally {
         // Ensures that the client will close when you finish/error
-        await client.close();
+        // await client.close();
     }
 }
 run().catch(console.dir);
+
+
+
 
 
 app.get("/", (req, res) => {
