@@ -33,6 +33,13 @@ async function run() {
         const jobCollection = client.db("hireHarbor").collection("jobs")
         const categoryCollection = client.db("hireHarbor").collection("category")
 
+        app.post("/jobs", async(req, res) => {
+            const job = req.body;
+            console.log(job);
+            const result = await jobCollection.insertOne(job)
+            res.send(result)
+        })
+
         app.get("/jobs", async (req, res) => {
             const cursor = jobCollection.find()
             const result = await cursor.toArray()
