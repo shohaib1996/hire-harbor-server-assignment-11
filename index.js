@@ -32,6 +32,10 @@ async function run() {
         // Send a ping to confirm a successful connection
         const jobCollection = client.db("hireHarbor").collection("jobs")
         const categoryCollection = client.db("hireHarbor").collection("category")
+        const appliedJobCollection = client.db("hireHarbor").collection("appliedJobs")
+
+
+        // job and category related api
 
         app.post("/jobs", async(req, res) => {
             const job = req.body;
@@ -54,6 +58,26 @@ async function run() {
         app.get("/category", async (req, res) => {
             const cursor = categoryCollection.find()
             const result = await cursor.toArray()
+            res.send(result)
+        })
+
+        // applied Job related Api
+        app.post("/applied-job", async(req, res) => {
+            const appliedJob = req.body;
+            const result = await appliedJobCollection.insertOne(appliedJob)
+            res.send(result)
+        })
+        app.get("/applied-job", async(req, res) => {
+            const cursor = appliedJobCollection.find()
+            const result = await cursor.toArray()
+            res.send(result)
+        })
+        app.get("/applied-job", async(req, res) =>{
+            let query = {}
+            if(req.query?.email){
+                query = {email: req.query.email}
+            }
+            const result = await appliedJobCollection.find(query).toArray()
             res.send(result)
         })
 
