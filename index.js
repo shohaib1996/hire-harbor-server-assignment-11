@@ -53,33 +53,36 @@ async function run() {
         app.get("/jobs", async (req, res) => {
             console.log(req.query.email);
             let query = {}
-            if(req.query?.email){
-                query = {userEmail : req.query.email}
+            if (req.query?.email) {
+                query = { userEmail: req.query.email }
             }
             const cursor = jobCollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
         })
-        // ...
-
-        // app.get("/jobs", async (req, res) => {
-        //     const userEmail = req.query.email;
-        //     if (!userEmail) {
-        //         return res.status(400).send("Please provide a valid userEmail parameter.");
-        //     }
-
-            
-        //     const query = { userEmail: 'sh@khan.com' }
-        //     console.log(userEmail);
-        //     console.log(query);
-        //     const result = await jobCollection.find(query).toArray();
-        //     res.send(result);
-        // });
-
-        // ...
-
-
-
+       
+        app.put("/jobs/:id", async (req, res) => {
+            const id = req.params.id
+            const query = { _id: new ObjectId(id) }
+            const options = { upsert: true }
+            const updateJob = req.body
+            const newJob = {
+                $set: {
+                    Posted_by: updateJob.Posted_by,
+                    Job_Title: updateJob.Job_Title,
+                    Job_Posting_Date: updateJob.Job_Posting_Date,
+                    Application_Deadline: updateJob.Application_Deadline,
+                    Salary_Range: updateJob.Salary_Range,
+                    Job_Applicants_Number: updateJob.Job_Applicants_Number,
+                    Job_Type: updateJob.Job_Type,
+                    Job_Image: updateJob.Job_Image, 
+                    Job_Description: updateJob.Job_Description, 
+                    userEmail: updateJob.userEmail
+                }
+            }
+            const result = await jobCollection.updateOne(query, newJob, options)
+            res.send(result)
+        })
 
         app.get("/category", async (req, res) => {
             const cursor = categoryCollection.find()
@@ -96,8 +99,8 @@ async function run() {
         app.get("/applied-job", async (req, res) => {
             // console.log(req.query.email)
             let query = {}
-            if(req.query?.email){
-                query = {email : req.query.email}
+            if (req.query?.email) {
+                query = { email: req.query.email }
             }
             const cursor = appliedJobCollection.find(query)
             const result = await cursor.toArray()
