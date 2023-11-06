@@ -37,24 +37,50 @@ async function run() {
 
         // job and category related api
 
-        app.post("/jobs", async(req, res) => {
+        app.post("/jobs", async (req, res) => {
             const job = req.body;
             console.log(job);
             const result = await jobCollection.insertOne(job)
             res.send(result)
         })
-        app.get("/jobs/:id", async(req, res) => {
+        app.get("/jobs/:id", async (req, res) => {
             const id = req.params.id;
-            const query = {_id: new ObjectId(id)}
+            const query = { _id: new ObjectId(id) }
             const result = await jobCollection.findOne(query)
             res.send(result)
         })
 
         app.get("/jobs", async (req, res) => {
-            const cursor = jobCollection.find()
+            console.log(req.query.email);
+            let query = {}
+            if(req.query?.email){
+                query = {userEmail : req.query.email}
+            }
+            const cursor = jobCollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
         })
+        // ...
+
+        // app.get("/jobs", async (req, res) => {
+        //     const userEmail = req.query.email;
+        //     if (!userEmail) {
+        //         return res.status(400).send("Please provide a valid userEmail parameter.");
+        //     }
+
+            
+        //     const query = { userEmail: 'sh@khan.com' }
+        //     console.log(userEmail);
+        //     console.log(query);
+        //     const result = await jobCollection.find(query).toArray();
+        //     res.send(result);
+        // });
+
+        // ...
+
+
+
+
         app.get("/category", async (req, res) => {
             const cursor = categoryCollection.find()
             const result = await cursor.toArray()
@@ -62,22 +88,19 @@ async function run() {
         })
 
         // applied Job related Api
-        app.post("/applied-job", async(req, res) => {
+        app.post("/applied-job", async (req, res) => {
             const appliedJob = req.body;
             const result = await appliedJobCollection.insertOne(appliedJob)
             res.send(result)
         })
-        app.get("/applied-job", async(req, res) => {
-            const cursor = appliedJobCollection.find()
-            const result = await cursor.toArray()
-            res.send(result)
-        })
-        app.get("/applied-job", async(req, res) =>{
+        app.get("/applied-job", async (req, res) => {
+            // console.log(req.query.email)
             let query = {}
             if(req.query?.email){
-                query = {email: req.query.email}
+                query = {email : req.query.email}
             }
-            const result = await appliedJobCollection.find(query).toArray()
+            const cursor = appliedJobCollection.find(query)
+            const result = await cursor.toArray()
             res.send(result)
         })
 
