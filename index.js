@@ -1,7 +1,8 @@
 const express = require('express');
 const cors = require('cors');
-// const jwt = require('jsonwebtoken')
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
+const cookieParser = require('cookie-parser');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 
 const app = express()
@@ -9,8 +10,12 @@ const port = process.env.PORT || 5000;
 
 
 // middleware 
-app.use(cors())
+app.use(cors({
+    origin: ["http://localhost:5173"],
+    credentials: true
+}))
 app.use(express.json())
+app.use(cookieParser());
 
 
 
@@ -32,7 +37,7 @@ const logger = async (req, res, next) => {
 
 const verifyToken = async (req, res, next) => {
     const token = req.cookies?.token;
-    console.log("token token", token );
+    console.log("token token", token);
     if (!token) {
         return res.status(401).send({ message: "not authorized" })
     }
@@ -56,7 +61,7 @@ async function run() {
         const categoryCollection = client.db("hireHarbor").collection("category")
         const appliedJobCollection = client.db("hireHarbor").collection("appliedJobs")
 
-        jwt
+        // jwt operation
         app.post("/jwt", async (req, res) => {
             const user = req.body;
             // console.log(user);
@@ -86,8 +91,10 @@ async function run() {
             res.send(result)
         })
 
-        app.get("/jobs", async (req, res) => {
+        app.get("/jobs", verifyToken, async (req, res) => {
             console.log(req.query.email);
+
+            
             let query = {}
             if (req.query?.email) {
                 query = { userEmail: req.query.email }
@@ -127,7 +134,7 @@ async function run() {
             res.send(result)
         })
 
-        app.get("/category", async (req, res) => {
+        app.get("/category", verifyToken, async (req, res) => {
             const cursor = categoryCollection.find()
             const result = await cursor.toArray()
             res.send(result)
@@ -139,12 +146,19 @@ async function run() {
             const result = await appliedJobCollection.insertOne(appliedJob)
             res.send(result)
         })
-        app.get("/applied-job", async (req, res) => {
+        app.get("/applied-job", logger, verifyToken, async (req, res) => {
             // console.log(req.query.email)
+            console.log('req.query.email:', req.query?.email);
+            console.log('req.user.email:', req.user?.email);
+
+            if (req.query.email !== req.user.email) {
+                return res.status(403).send({ message: 'forbidden access' })
+            }
             let query = {}
             if (req.query?.email) {
                 query = { email: req.query.email }
             }
+            // console.log("Token", req.cookies?.token);
             const cursor = appliedJobCollection.find(query)
             const result = await cursor.toArray()
             res.send(result)
@@ -155,7 +169,7 @@ async function run() {
             const count = await jobCollection.estimatedDocumentCount()
             res.send({ count })
         })
-        
+
 
 
         await client.db("admin").command({ ping: 1 });
