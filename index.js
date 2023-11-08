@@ -57,122 +57,9 @@ async function run() {
         // Connect the client to the server	(optional starting in v4.7)
         await client.connect();
         // Send a ping to confirm a successful connection
-        const jobCollection = client.db("hireHarbor").collection("jobs")
-        const categoryCollection = client.db("hireHarbor").collection("category")
-        const appliedJobCollection = client.db("hireHarbor").collection("appliedJobs")
+       
 
-        // jwt operation
-        app.post("/jwt", async (req, res) => {
-            const user = req.body;
-            // console.log(user);
-            const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
-            res
-                .cookie("token", token, {
-                    httpOnly: true,
-                    secure: true,
-                    sameSite: "none"
-                })
-                .send({ success: true })
-        })
-
-
-        // job and category related api
-
-        app.post("/jobs", async (req, res) => {
-            const job = req.body;
-            console.log(job);
-            const result = await jobCollection.insertOne(job)
-            res.send(result)
-        })
-        app.get("/jobs/:id", async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) }
-            const result = await jobCollection.findOne(query)
-            res.send(result)
-        })
-
-        app.get("/jobs", verifyToken, async (req, res) => {
-            console.log(req.query.email);
-
-            
-            let query = {}
-            if (req.query?.email) {
-                query = { userEmail: req.query.email }
-            }
-            const cursor = jobCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result)
-        })
-
-        app.put("/jobs/:id", async (req, res) => {
-            const id = req.params.id
-            const query = { _id: new ObjectId(id) }
-            const options = { upsert: true }
-            const updateJob = req.body
-            const newJob = {
-                $set: {
-                    Posted_by: updateJob.Posted_by,
-                    Job_Title: updateJob.Job_Title,
-                    Job_Posting_Date: updateJob.Job_Posting_Date,
-                    Application_Deadline: updateJob.Application_Deadline,
-                    Salary_Range: updateJob.Salary_Range,
-                    Job_Applicants_Number: updateJob.Job_Applicants_Number,
-                    Job_Type: updateJob.Job_Type,
-                    Job_Image: updateJob.Job_Image,
-                    Job_Description: updateJob.Job_Description,
-                    userEmail: updateJob.userEmail
-                }
-            }
-            const result = await jobCollection.updateOne(query, newJob, options)
-            res.send(result)
-        })
-
-        app.delete("/jobs/:id", async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: new ObjectId(id) }
-            const result = await jobCollection.deleteOne(query)
-            res.send(result)
-        })
-
-        app.get("/category", verifyToken, async (req, res) => {
-            const cursor = categoryCollection.find()
-            const result = await cursor.toArray()
-            res.send(result)
-        })
-
-        // applied Job related Api
-        app.post("/applied-job", async (req, res) => {
-            const appliedJob = req.body;
-            const result = await appliedJobCollection.insertOne(appliedJob)
-            res.send(result)
-        })
-        app.get("/applied-job", logger, verifyToken, async (req, res) => {
-            // console.log(req.query.email)
-            console.log('req.query.email:', req.query?.email);
-            console.log('req.user.email:', req.user?.email);
-
-            if (req.query.email !== req.user.email) {
-                return res.status(403).send({ message: 'forbidden access' })
-            }
-            let query = {}
-            if (req.query?.email) {
-                query = { email: req.query.email }
-            }
-            // console.log("Token", req.cookies?.token);
-            const cursor = appliedJobCollection.find(query)
-            const result = await cursor.toArray()
-            res.send(result)
-        })
-
-        //pagination
-        app.get("/jobCount", async (req, res) => {
-            const count = await jobCollection.estimatedDocumentCount()
-            res.send({ count })
-        })
-
-
-
-        await client.db("admin").command({ ping: 1 });
+        // await client.db("admin").command({ ping: 1 });
         console.log("Pinged your deployment. You successfully connected to MongoDB!");
 
     } finally {
@@ -180,7 +67,132 @@ async function run() {
         // await client.close();
     }
 }
+
+const jobCollection = client.db("hireHarbor").collection("jobs")
+const categoryCollection = client.db("hireHarbor").collection("category")
+const appliedJobCollection = client.db("hireHarbor").collection("appliedJobs")
+const testimonialCollection = client.db("hireHarbor").collection("testimonial")
+
+// jwt operation
+app.post("/jwt", async (req, res) => {
+    const user = req.body;
+    // console.log(user);
+    const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, { expiresIn: "1h" })
+    res
+        .cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        })
+        .send({ success: true })
+})
+
+
+// job and category related api
+
+app.post("/jobs", async (req, res) => {
+    const job = req.body;
+    console.log(job);
+    const result = await jobCollection.insertOne(job)
+    res.send(result)
+})
+app.get("/jobs/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) }
+    const result = await jobCollection.findOne(query)
+    res.send(result)
+})
+
+app.get("/jobs", verifyToken, async (req, res) => {
+    console.log(req.query.email);
+
+    
+    let query = {}
+    if (req.query?.email) {
+        query = { userEmail: req.query.email }
+    }
+    const cursor = jobCollection.find(query)
+    const result = await cursor.toArray()
+    res.send(result)
+})
+
+app.put("/jobs/:id", async (req, res) => {
+    const id = req.params.id
+    const query = { _id: new ObjectId(id) }
+    const options = { upsert: true }
+    const updateJob = req.body
+    const newJob = {
+        $set: {
+            Posted_by: updateJob.Posted_by,
+            Job_Title: updateJob.Job_Title,
+            Job_Posting_Date: updateJob.Job_Posting_Date,
+            Application_Deadline: updateJob.Application_Deadline,
+            Salary_Range: updateJob.Salary_Range,
+            Job_Applicants_Number: updateJob.Job_Applicants_Number,
+            Job_Type: updateJob.Job_Type,
+            Job_Image: updateJob.Job_Image,
+            Job_Description: updateJob.Job_Description,
+            userEmail: updateJob.userEmail
+        }
+    }
+    const result = await jobCollection.updateOne(query, newJob, options)
+    res.send(result)
+})
+
+app.delete("/jobs/:id", async (req, res) => {
+    const id = req.params.id;
+    const query = { _id: new ObjectId(id) }
+    const result = await jobCollection.deleteOne(query)
+    res.send(result)
+})
+
+app.get("/category", verifyToken, async (req, res) => {
+    const cursor = categoryCollection.find()
+    const result = await cursor.toArray()
+    res.send(result)
+})
+
+// applied Job related Api
+app.post("/applied-job", async (req, res) => {
+    const appliedJob = req.body;
+    const result = await appliedJobCollection.insertOne(appliedJob)
+    res.send(result)
+})
+app.get("/applied-job", logger, verifyToken, async (req, res) => {
+    // console.log(req.query.email)
+    console.log('req.query.email:', req.query?.email);
+    console.log('req.user.email:', req.user?.email);
+
+    if (req.query.email !== req.user.email) {
+        return res.status(403).send({ message: 'forbidden access' })
+    }
+    let query = {}
+    if (req.query?.email) {
+        query = { email: req.query.email }
+    }
+    // console.log("Token", req.cookies?.token);
+    const cursor = appliedJobCollection.find(query)
+    const result = await cursor.toArray()
+    res.send(result)
+})
+
+//pagination
+app.get("/jobCount", async (req, res) => {
+    const count = await jobCollection.estimatedDocumentCount()
+    res.send({ count })
+})
+
+// testimonial
+app.get("/testimonial", async(req, res) => {
+    const result = await testimonialCollection.find().toArray()
+    res.send(result)
+})
+
+
 run().catch(console.dir);
+
+
+
 
 
 
