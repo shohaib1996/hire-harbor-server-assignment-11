@@ -95,7 +95,7 @@ app.post("/jobs", async (req, res) => {
     const result = await jobCollection.insertOne(job)
     res.send(result)
 })
-app.get("/jobs/:id", verifyToken,async (req, res) => {
+app.get("/jobs/:id", verifyToken, async (req, res) => {
     const id = req.params.id;
     const query = { _id: new ObjectId(id) }
     const result = await jobCollection.findOne(query)
@@ -176,7 +176,7 @@ app.get("/applied-job", logger, verifyToken, async (req, res) => {
 })
 
 //pagination
-app.get("/jobCount", async (req, res) => {
+app.get("/jobCount",  async (req, res) => {
     const count = await jobCollection.estimatedDocumentCount()
     res.send({ count })
 })
