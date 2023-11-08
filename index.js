@@ -67,7 +67,6 @@ async function run() {
         // await client.close();
     }
 }
-
 const jobCollection = client.db("hireHarbor").collection("jobs")
 const categoryCollection = client.db("hireHarbor").collection("category")
 const appliedJobCollection = client.db("hireHarbor").collection("appliedJobs")
@@ -96,14 +95,14 @@ app.post("/jobs", async (req, res) => {
     const result = await jobCollection.insertOne(job)
     res.send(result)
 })
-app.get("/jobs/:id", async (req, res) => {
+app.get("/jobs/:id", verifyToken,async (req, res) => {
     const id = req.params.id;
     const query = { _id: new ObjectId(id) }
     const result = await jobCollection.findOne(query)
     res.send(result)
 })
 
-app.get("/jobs", verifyToken, async (req, res) => {
+app.get("/jobs", async (req, res) => {
     console.log(req.query.email);
 
     
@@ -146,7 +145,7 @@ app.delete("/jobs/:id", async (req, res) => {
     res.send(result)
 })
 
-app.get("/category", verifyToken, async (req, res) => {
+app.get("/category",  async (req, res) => {
     const cursor = categoryCollection.find()
     const result = await cursor.toArray()
     res.send(result)
@@ -189,7 +188,10 @@ app.get("/testimonial", async(req, res) => {
 })
 
 
+
 run().catch(console.dir);
+
+
 
 
 
